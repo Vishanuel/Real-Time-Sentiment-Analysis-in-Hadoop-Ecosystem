@@ -108,6 +108,23 @@ public class Main {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        Runtime rt = Runtime.getRuntime();
+        Main rte = new Main();
+        printOutput errorReported, outputMessage;
+
+        try 
+        {
+        	Process proc = rt.exec("/home/s11148140/Downloads/AFINN/hadoop fs -put");
+            errorReported = rte.getStreamWrapper(proc.getErrorStream(), "ERROR");
+            outputMessage = rte.getStreamWrapper(proc.getInputStream(), "OUTPUT");
+            errorReported.start();
+            outputMessage.start();
+        } 
+        catch (IOException e) 
+        {
+            e.printStackTrace();
+        }
+        
         Connection con = DriverManager.getConnection("jdbc:hive2://localhost:10000/", "", "");
         Statement stmt = con.createStatement();
        
@@ -145,12 +162,13 @@ public class Main {
         stmt.execute("create external table if not exists load_tweets(id BIGINT, text STRING) ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.JsonSerDe' LOCATION '/user/Hadoop/twitter_data'");
         stmt.execute("LOAD DATA INPATH '/user/Hadoop/twitter_data' INTO TABLE load_tweets");
         stmt.execute("drop table if exists split_words");
+        stmt.execute("drop table if exists split ");
         stmt.execute("drop table if exists tweet_word");
         stmt.execute("drop table if exists key_word");
         stmt.execute("drop table if exists tweets_join");
         stmt.execute("drop table if exists dictionary");
         stmt.execute("drop table if exists word_join ");
-        stmt.execute("create table if not exists split as select id as id,REGEXP_REPLACE(text,'[^0-9A-Za-z]+',\") as words from load_tweets");
+        stmt.execute("create table if not exists split as select id as id,REGEXP_REPLACE(text,'[^0-9A-Za-z]+',' ') as text from load_tweets");
         stmt.execute("create table if not exists split_words as select id as id,split(text,' ') as words from split");
         stmt.execute("create table if not exists tweet_word as select id as id,word from split_words LATERAL VIEW explode(words) w as word");
         stmt.execute("create table if not exists key_word as select id as id, search from split_words LATERAL VIEW explode(words) w as search where search like \"%mazon%\" OR search like \"%bay%\" OR search like \"%Bay%\" OR search like \"%liexpress%\"");
