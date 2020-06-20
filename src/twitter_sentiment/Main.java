@@ -108,22 +108,7 @@ public class Main {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        Runtime rt = Runtime.getRuntime();
-        Main rte = new Main();
-        printOutput errorReported, outputMessage;
-
-        try 
-        {
-        	Process proc = rt.exec("/home/s11148140/Downloads/AFINN/hadoop fs -put");
-            errorReported = rte.getStreamWrapper(proc.getErrorStream(), "ERROR");
-            outputMessage = rte.getStreamWrapper(proc.getInputStream(), "OUTPUT");
-            errorReported.start();
-            outputMessage.start();
-        } 
-        catch (IOException e) 
-        {
-            e.printStackTrace();
-        }
+       
         
         Connection con = DriverManager.getConnection("jdbc:hive2://localhost:10000/", "", "");
         Statement stmt = con.createStatement();
@@ -132,8 +117,9 @@ public class Main {
         stmt.execute("drop table if exists tweet_word");
         stmt.execute("drop table if exists key_word");
         stmt.execute("drop table if exists tweets_join");
-        stmt.execute("drop table if exists dictionary");
+        //stmt.execute("drop table if exists dictionary");
         stmt.execute("drop table if exists word_join ");
+        stmt.execute("drop table if exists rating_table ");
         con.close();
     }
     
@@ -166,33 +152,61 @@ public class Main {
         stmt.execute("drop table if exists tweet_word");
         stmt.execute("drop table if exists key_word");
         stmt.execute("drop table if exists tweets_join");
-        stmt.execute("drop table if exists dictionary");
+       // stmt.execute("drop table if exists dictionary");
         stmt.execute("drop table if exists word_join ");
+        stmt.execute("drop table if exists rating_table ");
         stmt.execute("create table if not exists split as select id as id,REGEXP_REPLACE(text,'[^0-9A-Za-z]+',' ') as text from load_tweets");
         stmt.execute("create table if not exists split_words as select id as id,split(text,' ') as words from split");
         stmt.execute("create table if not exists tweet_word as select id as id,word from split_words LATERAL VIEW explode(words) w as word");
-        stmt.execute("create table if not exists key_word as select id as id, search from split_words LATERAL VIEW explode(words) w as search where search like \"%mazon%\" OR search like \"%bay%\" OR search like \"%Bay%\" OR search like \"%liexpress%\"");
+        stmt.execute("create table if not exists key_word stored as orc TBLPROPERTIES('transactional'='true') as select id as id, search from split_words LATERAL VIEW explode(words) w as search where search like \"%mazon%\" OR search like \"%bay%\" OR search like \"%Bay%\" OR search like \"%liexpress%\" ");
+        stmt.execute("update key_word SET search = 'amazon' where search like \"%mazon%\" ");
+        stmt.execute("update key_word SET search = 'eBay' where search like \"%bay%\" ");
+        stmt.execute("update key_word SET search = 'aliexpress' where search like \"%liepxress%\" ");
         stmt.execute("create table if not exists tweets_join as select tweet_word.id, tweet_word.word,key_word.search from tweet_word LEFT OUTER JOIN key_word ON(tweet_word.id = key_word.id)");
         stmt.execute("create table if not exists dictionary(word string,rating int) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t'");
-        stmt.execute("LOAD DATA INPATH '/user/AFINN-111.txt' into TABLE dictionary");
+      //  stmt.execute("LOAD DATA INPATH '/user/AFINN-111.txt' into TABLE dictionary");
         stmt.execute("create table if not exists word_join as select tweets_join.id, tweets_join.word, tweets_join.search, dictionary.rating from tweets_join LEFT OUTER JOIN dictionary ON(tweets_join.word = dictionary.word)");
         //stmt.execute("select id,AVG(rating) as rating from word_join GROUP BY word_join.id order by rating DESC");
         //while(output.next()) {
             //System.out.println(output.getString(1));
         //}
-         
-          ResultSet rs = stmt.executeQuery("select id,search,AVG(rating) as rating from word_join GROUP BY word_join.id, search order by rating DESC");
-          System.out.println("ID          | Rating  |     Search");
+        stmt.execute("create table if not exists rating_table as select id as id,search as search,AVG(rating) as rating from word_join GROUP BY word_join.id, search order by rating");
+         ResultSet rs = stmt.executeQuery("select COUNT(id), search from rating_table where rating > 0 GROUP BY search");
+         // ResultSet rs = stmt.executeQuery("select id,search,AVG(rating) as rating from word_join GROUP BY word_join.id, search order by rating DESC");
+          System.out.println("Count+     Search");
 
           while (rs.next()) {
-             int id = rs.getInt("id");
+             int count = rs.getInt("_c0");
                  //String word = rs.getString("word");
              //String search = rs.getString("search");
              //String rating = rs.getString("rating");
              String search = rs.getString("search");
-             int rating = rs.getInt("rating");
-             System.out.println(id+"	"+rating+"    "+search);
+            // int rating = rs.getInt("rating");
+             System.out.println(count+"    "+search);
           }
+          System.out.println("\n\nCount0     Search");
+          ResultSet rs2 = stmt.executeQuery("select COUNT(id), search from rating_table where rating = 0 GROUP BY search");
+          while (rs2.next()) {
+              int count = rs2.getInt("_c0");
+                  //String word = rs.getString("word");
+              //String search = rs.getString("search");
+              //String rating = rs.getString("rating");
+              String search = rs2.getString("search");
+             // int rating = rs.getInt("rating");
+              System.out.println(count+"    "+search);
+           }
+           
+          System.out.println("\n\nCount-     Search");
+          ResultSet rs3 = stmt.executeQuery("select COUNT(id), search from rating_table where rating < 0 GROUP BY search");
+          while (rs3.next()) {
+              int count = rs3.getInt("_c0");
+                  //String word = rs.getString("word");
+              //String search = rs.getString("search");
+              //String rating = rs.getString("rating");
+              String search = rs3.getString("search");
+             // int rating = rs.getInt("rating");
+              System.out.println(count+"    "+search);
+           }
         con.close();
     }
     

@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/CopyLibs/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/apache-log4j-extras-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/apacheds-i18n-2.0.0-M15.jar"/>
@@ -71,7 +75,6 @@
 	<classpathentry kind="lib" path="lib/CopyLibs/flume-ng-node-1.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/flume-ng-sdk-1.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/flume-scribe-source-1.6.0.jar"/>
-	<classpathentry kind="lib" path="lib/CopyLibs/flume-sources-1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/flume-spillable-memory-channel-1.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/flume-thrift-source-1.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/flume-tools-1.6.0.jar"/>
@@ -197,9 +200,7 @@
 	<classpathentry kind="lib" path="lib/CopyLibs/snappy-java-1.0.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/snappy-java-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/stax-api-1.0-2.jar"/>
-	<classpathentry kind="lib" path="lib/CopyLibs/twitter4j-core-3.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/twitter4j-media-support-3.0.3.jar"/>
-	<classpathentry kind="lib" path="lib/CopyLibs/twitter4j-stream-3.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/velocity-1.7.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/xalan-2.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/xercesImpl-2.9.1.jar"/>
@@ -208,5 +209,6 @@
 	<classpathentry kind="lib" path="lib/CopyLibs/xz-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/zkclient-0.3.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/zookeeper-3.4.6.jar"/>
+	<classpathentry kind="lib" path="lib/CopyLibs/flume-sources-1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

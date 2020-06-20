@@ -14,4 +14,11 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>CopyLibs</name>
+			<type>2</type>
+			<location>/home/s11148140/eclipse-workspace/cs424_sentiment_analysis/lib/CopyLibs</location>
+		</link>
+	</linkedResources>
 </projectDescription>
