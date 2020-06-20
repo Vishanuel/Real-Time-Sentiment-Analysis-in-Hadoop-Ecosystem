@@ -24,9 +24,14 @@ import java.sql.DriverManager;
  *
  * @author s11146921
  */
-public class Main {
+public class Main{
     private static String driverName = "org.apache.hive.jdbc.HiveDriver";
-        
+    
+    
+
+    
+    
+    
     public printOutput getStreamWrapper(InputStream is, String type)
     {
         return new printOutput(is, type);
@@ -77,6 +82,7 @@ public class Main {
         String[] args1 = new String[] { "agent","-nTwitterAgent","-f/home/s11148140/apache-flume-1.6.0-bin/conf/twitter.conf" };
         BasicConfigurator.configure();
         Application.main(args1);
+        System.setProperty("hadoop.home.dir","/usr/local/hadoop-3.2.1/");
     }
     
         public static void StartHiveServer() 
@@ -152,7 +158,7 @@ public class Main {
         stmt.execute("drop table if exists tweet_word");
         stmt.execute("drop table if exists key_word");
         stmt.execute("drop table if exists tweets_join");
-       // stmt.execute("drop table if exists dictionary");
+        stmt.execute("drop table if exists dictionary");
         stmt.execute("drop table if exists word_join ");
         stmt.execute("drop table if exists rating_table ");
         stmt.execute("create table if not exists split as select id as id,REGEXP_REPLACE(text,'[^0-9A-Za-z]+',' ') as text from load_tweets");
@@ -164,7 +170,7 @@ public class Main {
         stmt.execute("update key_word SET search = 'aliexpress' where search like \"%liepxress%\" ");
         stmt.execute("create table if not exists tweets_join as select tweet_word.id, tweet_word.word,key_word.search from tweet_word LEFT OUTER JOIN key_word ON(tweet_word.id = key_word.id)");
         stmt.execute("create table if not exists dictionary(word string,rating int) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t'");
-      //  stmt.execute("LOAD DATA INPATH '/user/AFINN-111.txt' into TABLE dictionary");
+        stmt.execute("LOAD DATA INPATH '/user/AFINN-111.txt' into TABLE dictionary");
         stmt.execute("create table if not exists word_join as select tweets_join.id, tweets_join.word, tweets_join.search, dictionary.rating from tweets_join LEFT OUTER JOIN dictionary ON(tweets_join.word = dictionary.word)");
         //stmt.execute("select id,AVG(rating) as rating from word_join GROUP BY word_join.id order by rating DESC");
         //while(output.next()) {
@@ -209,7 +215,7 @@ public class Main {
            }
         con.close();
     }
-    
+        
     /**
      * @param args the command line arguments
      */       
