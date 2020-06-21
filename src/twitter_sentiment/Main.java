@@ -251,7 +251,7 @@ public class Main extends Application{
             System.out.println("--------------Twitter Sentiment Analysis------------");
             System.out.println("Enter '1' to format namenode(if required)");  
             System.out.println("Enter '2' to start HADOOP & YARN");
-            System.out.println("Enter '3' to begin fetching tweets into HDFS");
+            System.out.println("Enter '3' to begin fetching tweets into HDFS and running hive query and graphing (basically the main thing this app should do.)");
             System.out.println("Enter '4' to start hiveserver2");
             System.out.println("Enter '5' to drop tables");
             System.out.println("Enter '6' to process data");
