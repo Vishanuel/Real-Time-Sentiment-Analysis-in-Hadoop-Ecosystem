@@ -76,15 +76,15 @@ public class App extends Application {
        // series.setName("Data Series");
 
         // add series to chart
-         series1.getData().add(new XYChart.Data(Amazon, -1));
-   		series1.getData().add(new XYChart.Data(eBay, 1));
-   		 series1.getData().add(new XYChart.Data(Aliexpress, +98));
-  		 series2.getData().add(new XYChart.Data(Amazon, -98));
-   		series2.getData().add(new XYChart.Data(eBay, +1));
-   		 series2.getData().add(new XYChart.Data(Aliexpress, 66));
-  		series3.getData().add(new XYChart.Data(Amazon, -77));
-  		series3.getData().add(new XYChart.Data(eBay, +10));
-  		 series3.getData().add(new XYChart.Data(Aliexpress, +2));
+         series1.getData().add(new XYChart.Data(Amazon, 0));
+   		series1.getData().add(new XYChart.Data(eBay, 0));
+   		 series1.getData().add(new XYChart.Data(Aliexpress, 0));
+  		 series2.getData().add(new XYChart.Data(Amazon, 0));
+   		series2.getData().add(new XYChart.Data(eBay, 0));
+   		 series2.getData().add(new XYChart.Data(Aliexpress, 0));
+  		series3.getData().add(new XYChart.Data(Amazon, 0));
+  		series3.getData().add(new XYChart.Data(eBay, 0));
+  		 series3.getData().add(new XYChart.Data(Aliexpress, 0));
         bc.getData().addAll(series1,series2,series3);
 
         // setup scene
@@ -106,15 +106,35 @@ public class App extends Application {
 			protected Void call() throws Exception {
 				// TODO Auto-generated method stub
 				while (true) {
+	              
 	                try {
-	                    Thread.sleep(1000);
-	                } catch (InterruptedException ex) {
-	                }
-	                try {
+	                	Thread.sleep(1000);
             			 Connection con = DriverManager.getConnection("jdbc:hive2://localhost:10000/", "", "");
             			 Statement stmt = con.createStatement();
             			 
-       
+             			 stmt.execute("create external table if not exists load_tweets(id BIGINT, text STRING) ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.JsonSerDe' LOCATION '/user/Hadoop/twitter_data'");
+            	          stmt.execute("LOAD DATA INPATH '/user/Hadoop/twitter_data' INTO TABLE load_tweets");
+            	          stmt.execute("drop table if exists split_words");
+            	          stmt.execute("drop table if exists split ");
+            	          stmt.execute("drop table if exists tweet_word");
+            	          stmt.execute("drop table if exists key_word");
+            	          stmt.execute("drop table if exists tweets_join");
+            	        //  stmt.execute("drop table if exists dictionary");
+            	          stmt.execute("drop table if exists word_join ");
+            	          stmt.execute("drop table if exists rating_table ");
+            	          stmt.execute("create table if not exists split as select id as id,REGEXP_REPLACE(text,'[^0-9A-Za-z]+',' ') as text from load_tweets");
+            	          stmt.execute("create table if not exists split_words as select id as id,split(text,' ') as words from split");
+            	          stmt.execute("create table if not exists tweet_word as select id as id,word from split_words LATERAL VIEW explode(words) w as word");
+            	          stmt.execute("create table if not exists key_word stored as orc TBLPROPERTIES('transactional'='true') as select id as id, search from split_words LATERAL VIEW explode(words) w as search where search like \"%mazon%\" OR search like \"%bay%\" OR search like \"%Bay%\" OR search like \"%liexpress%\" ");
+            	        //  stmt.execute("UPDATE key_word SET search = (case when search like '%mazon%'  then 'Amazon' when search like '%bay%' then 'eBay' when search like '%liepxress%' then 'Aliexpress' end) WHERE search in ('%mazon%', '%bay%', '%liepxress%')");
+            	          stmt.execute("update key_word SET search = 'amazon' where search like \"%mazon%\" ");
+            	          stmt.execute("update key_word SET search = 'eBay' where search like \"%bay%\" ");
+            	          stmt.execute("update key_word SET search = 'aliexpress' where search like \"%liepxress%\" ");
+            	          stmt.execute("create table if not exists tweets_join as select tweet_word.id, tweet_word.word,key_word.search from tweet_word LEFT OUTER JOIN key_word ON(tweet_word.id = key_word.id)");
+            	          stmt.execute("create table if not exists dictionary(word string,rating int) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t'");
+            	          //stmt.execute("LOAD DATA INPATH '/user/AFINN-111.txt' into TABLE dictionary");
+            	          stmt.execute("create table if not exists word_join as select tweets_join.id, tweets_join.word, tweets_join.search, dictionary.rating from tweets_join LEFT OUTER JOIN dictionary ON(tweets_join.word = dictionary.word)");
+            	          stmt.execute("create table if not exists rating_table as select id as id,search as search,AVG(rating) as rating from word_join GROUP BY word_join.id, search order by rating");      
             	           ResultSet rs = stmt.executeQuery("select COUNT(id), search from rating_table where rating > 0 GROUP BY search");
             	           // ResultSet rs = stmt.executeQuery("select id,search,AVG(rating) as rating from word_join GROUP BY word_join.id, search order by rating DESC");
             	            System.out.println("Count+     Search");
@@ -131,7 +151,7 @@ public class App extends Application {
             	              // int rating = rs.getInt("rating");
             	            // System.out.println("dawdwa"+search+"wdad");
             	               
-            	               if(search.contains("Amazon")) {
+            	               if(search.contains("amazon")) {
             	            	  System.out.println("series1   "+search);
             	            	  Platform.runLater(() -> {
             	             	   series1.getData().add(new XYChart.Data(Amazon, count));
@@ -143,7 +163,7 @@ public class App extends Application {
             	             	   series1.getData().add(new XYChart.Data(eBay, count));
             	                	  });
             	                }
-            	                else if(search.contains("Aliexpress")){
+            	                else if(search.contains("aliexpress")){
             	                	System.out.println("series1   "+search);
             	                	Platform.runLater(() -> {
             	             	   series1.getData().add(new XYChart.Data(Aliexpress, count));
@@ -166,7 +186,7 @@ public class App extends Application {
              	            	  search = search.strip();
              	              
             	               // int rating = rs.getInt("rating");
-            	                if(search.contains("Amazon")) {
+            	                if(search.contains("amazon")) {
             	                	System.out.println("series2   "+search);
             	                	Platform.runLater(() -> {
             	             	   series2.getData().add(new XYChart.Data(Amazon, count));
@@ -178,7 +198,7 @@ public class App extends Application {
             	             	   series2.getData().add(new XYChart.Data(eBay, count));
             	                	  });
             	                }
-            	                else if(search.contains("Aliexpress")){
+            	                else if(search.contains("aliexpress")){
             	                	System.out.println("series2   "+search);
             	                	Platform.runLater(() -> {
             	             	   series2.getData().add(new XYChart.Data(Aliexpress, count));
@@ -206,7 +226,7 @@ public class App extends Application {
            		 	            	  search = search.trim();
            		 	              
            					   // int rating = rs.getInt("rating");
-           					    if(search.contains("Amazon")) {
+           					    if(search.contains("amazon")) {
            					    	System.out.println(search);
            					    	Platform.runLater(() -> {
            					  	   series3.getData().add(new XYChart.Data(Amazon, count));
@@ -218,7 +238,7 @@ public class App extends Application {
            					  	   series3.getData().add(new XYChart.Data(eBay, count));
            					     });
            					     }
-           					     else if(search.contains("Aliexpress")){
+           					     else if(search.contains("aliexpress")){
            					    	 System.out.println("series3   "+search);
            					    	Platform.runLater(() -> {
            					  	   series3.getData().add(new XYChart.Data(Aliexpress, count));
@@ -279,28 +299,27 @@ public class App extends Application {
             	  	  		// bc.getData().add(series2);
             	  	  		// bc.getData().add(series3);
              			 
-             		//	 stmt.execute("create external table if not exists load_tweets(id BIGINT, text STRING) ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.JsonSerDe' LOCATION '/user/Hadoop/twitter_data'");
-             	      //    stmt.execute("LOAD DATA INPATH '/user/Hadoop/twitter_data' INTO TABLE load_tweets");
-             	      //    stmt.execute("drop table if exists split_words");
-             	      //    stmt.execute("drop table if exists split ");
-             	       //   stmt.execute("drop table if exists tweet_word");
-             	     //     stmt.execute("drop table if exists key_word");
-             	         // stmt.execute("drop table if exists tweets_join");
+             			 stmt.execute("create external table if not exists load_tweets(id BIGINT, text STRING) ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.JsonSerDe' LOCATION '/user/Hadoop/twitter_data'");
+             	          stmt.execute("LOAD DATA INPATH '/user/Hadoop/twitter_data' INTO TABLE load_tweets");
+             	          stmt.execute("drop table if exists split_words");
+             	          stmt.execute("drop table if exists split ");
+             	          stmt.execute("drop table if exists tweet_word");
+             	          stmt.execute("drop table if exists key_word");
+             	          stmt.execute("drop table if exists tweets_join");
              	        //  stmt.execute("drop table if exists dictionary");
-             	      //    stmt.execute("drop table if exists word_join ");
-             	       ///   stmt.execute("drop table if exists rating_table ");
-             	       //   stmt.execute("create table if not exists split as select id as id,REGEXP_REPLACE(text,'[^0-9A-Za-z]+',' ') as text from load_tweets");
-             	       //   stmt.execute("create table if not exists split_words as select id as id,split(text,' ') as words from split");
-             	        //  stmt.execute("create table if not exists tweet_word as select id as id,word from split_words LATERAL VIEW explode(words) w as word");
-             	       ///   stmt.execute("create table if not exists key_word stored as orc TBLPROPERTIES('transactional'='true') as select id as id, search from split_words LATERAL VIEW explode(words) w as search where search like \"%mazon%\" OR search like \"%bay%\" OR search like \"%Bay%\" OR search like \"%liexpress%\" ");
-             	      //    stmt.execute("update key_word SET search = 'Amazon' where search like \"%mazon%\" ");
-             	       //   stmt.execute("update key_word SET search = 'eBay' where search like \"%bay%\" ");
-             	       //   stmt.execute("update key_word SET search = 'Aliexpress' where search like \"%liepxress%\" ");
-             	       //   stmt.execute("create table if not exists tweets_join as select tweet_word.id, tweet_word.word,key_word.search from tweet_word LEFT OUTER JOIN key_word ON(tweet_word.id = key_word.id)");
-             	         // stmt.execute("create table if not exists dictionary(word string,rating int) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t'");
+             	          stmt.execute("drop table if exists word_join ");
+             	          stmt.execute("drop table if exists rating_table ");
+             	          stmt.execute("create table if not exists split as select id as id,REGEXP_REPLACE(text,'[^0-9A-Za-z]+',' ') as text from load_tweets");
+             	          stmt.execute("create table if not exists split_words as select id as id,split(text,' ') as words from split");
+             	          stmt.execute("create table if not exists tweet_word as select id as id,word from split_words LATERAL VIEW explode(words) w as word");
+             	          stmt.execute("create table if not exists key_word stored as orc TBLPROPERTIES('transactional'='true') as select id as id, search from split_words LATERAL VIEW explode(words) w as search where search like \"%mazon%\" OR search like \"%bay%\" OR search like \"%Bay%\" OR search like \"%liexpress%\" ");
+             	          stmt.execute("UPDATE key_word SET search = (case when search like '%mazon%'  then 'Amazon' when search like '%bay%' then 'eBay' when search like '%liepxress%' then 'Aliexpress' end) WHERE search in ('%mazon%', '%bay%', '%liepxress%')");
+
+             	          stmt.execute("create table if not exists tweets_join as select tweet_word.id, tweet_word.word,key_word.search from tweet_word LEFT OUTER JOIN key_word ON(tweet_word.id = key_word.id)");
+             	          stmt.execute("create table if not exists dictionary(word string,rating int) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t'");
              	          //stmt.execute("LOAD DATA INPATH '/user/AFINN-111.txt' into TABLE dictionary");
-             	        //  stmt.execute("create table if not exists word_join as select tweets_join.id, tweets_join.word, tweets_join.search, dictionary.rating from tweets_join LEFT OUTER JOIN dictionary ON(tweets_join.word = dictionary.word)");
-             	          //stmt.execute("select id,AVG(rating) as rating from word_join GROUP BY word_join.id order by rating DESC");
+             	          stmt.execute("create table if not exists word_join as select tweets_join.id, tweets_join.word, tweets_join.search, dictionary.rating from tweets_join LEFT OUTER JOIN dictionary ON(tweets_join.word = dictionary.word)");
+             	          stmt.execute("select id,AVG(rating) as rating from word_join GROUP BY word_join.id order by rating DESC");
              	          //while(output.next()) {
              	              //System.out.println(output.getString(1));
              	          //}
