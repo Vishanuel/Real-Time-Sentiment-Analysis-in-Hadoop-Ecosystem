@@ -53,7 +53,7 @@ public class Main extends Application{
 
         try 
         {
-            Process proc = rt.exec("/usr/local/hadoop-2.7.3/bin/hdfs namenode -format");
+            Process proc = rt.exec("hdfs namenode -format");
             errorReported = rte.getStreamWrapper(proc.getErrorStream(), "ERROR");
             outputMessage = rte.getStreamWrapper(proc.getInputStream(), "OUTPUT");
             errorReported.start();
@@ -87,7 +87,7 @@ public class Main extends Application{
     
     public static void StartTweetFetching()
     {
-        String[] args1 = new String[] { "agent","-nTwitterAgent","-f/home/s11148140/apache-flume-1.6.0-bin/conf/twitter.conf" };
+        String[] args1 = new String[] { "agent","-nTwitterAgent","-f/usr/local/apache-flume-1.6.0-bin/conf/twitter.conf" };
         BasicConfigurator.configure();
         Application.main(args1);
         System.setProperty("hadoop.home.dir","/usr/local/hadoop-3.2.1/");
@@ -132,7 +132,7 @@ public class Main extends Application{
         stmt.execute("drop table if exists tweet_word");
         stmt.execute("drop table if exists key_word");
         stmt.execute("drop table if exists tweets_join");
-        //stmt.execute("drop table if exists dictionary");
+        stmt.execute("drop table if exists dictionary");
         stmt.execute("drop table if exists word_join ");
         stmt.execute("drop table if exists rating_table ");
         con.close();
@@ -150,15 +150,6 @@ public class Main extends Application{
         }
         Connection con = DriverManager.getConnection("jdbc:hive2://localhost:10000/", "", "");
         Statement stmt = con.createStatement();
-        //stmt.executeQuery(arg0);
-        /*
-        stmt.execute("drop table if exists split_words");
-        stmt.execute("drop table if exists tweet_word");
-        stmt.execute("drop table if exists key_word");
-        stmt.execute("drop table if exists tweets_join");
-        stmt.execute("drop table if exists dictionary");
-        stmt.execute("drop table if exists word_join ");
-       */
         
         stmt.execute("create external table if not exists load_tweets(id BIGINT, text STRING) ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.JsonSerDe' LOCATION '/user/Hadoop/twitter_data'");
         stmt.execute("LOAD DATA INPATH '/user/Hadoop/twitter_data' INTO TABLE load_tweets");
@@ -224,19 +215,6 @@ public class Main extends Application{
            }
         con.close();
     }
-    public static void rungraph3()
-    {
-    	graphupdate update = null;
-    	update.run();
-    	//Platform.startup(() ->{
-   		 javafx.application.Application.launch(Bargraph.class);
-    	//});
-
-    	
-    }
-
-	
-
     
 
 	/**
@@ -249,18 +227,18 @@ public class Main extends Application{
         do
         {
             System.out.println("--------------Twitter Sentiment Analysis------------");
-            System.out.println("Enter '1' to format namenode(if required)");  
-            System.out.println("Enter '2' to start HADOOP & YARN");
+            System.out.println("Enter '1' to format namenode(if required, development and debugging)");  
+            System.out.println("Enter '2' to start HADOOP & YARN(development and debugging)");
             System.out.println("Enter '3' to begin fetching tweets into HDFS and running hive query and graphing (basically the main thing this app should do.)");
-            System.out.println("Enter '4' to start hiveserver2");
-            System.out.println("Enter '5' to drop tables");
-            System.out.println("Enter '6' to process data");
-            System.out.println("Enter '10' to exit");
+            System.out.println("Enter '4' to start hiveserver2(development and debugging)");
+            System.out.println("Enter '5' to drop tables(development and debugging)");
+            System.out.println("Enter '6' to process data(development and debugging)");
+            System.out.println("Enter '9' to exit");
             //System.out.print(">>");
             
             // Get user's input and perform the operations
             Scanner u_input = new Scanner(System.in);
-            while(!u_input.hasNextInt() || (!u_input.hasNext("[1234567]")))
+            while(!u_input.hasNextInt() || (!u_input.hasNext("[1234569]")))
             {
                 System.out.println("Invalid entry");
                 System.out.println("Please enter a valid number from the choices listed above");
@@ -301,12 +279,11 @@ public class Main extends Application{
 					e.printStackTrace();
 				}
 				break;
-                case 7://Display Graph
-                    rungraph3();
-
-                break;
+                case 9:
+                	System.exit(0);
+                break;	
             }
-        }while(input != 10);
+        }while(input != 9);
     }
     
     private class printOutput extends Thread
@@ -333,26 +310,6 @@ public class Main extends Application{
             {
                 ioe.printStackTrace();
             }
-        }
-    }
-    private class graphupdate extends Thread
-    {
-       // InputStream is = null;
-    		 int start = 0;
-       graphupdate(int start) 
-        {
-            this.start = start;
-        }
-
-        public void run() 
-        {
-        	try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-        	
         }
     }
 }
