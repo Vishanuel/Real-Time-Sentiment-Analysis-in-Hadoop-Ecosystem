@@ -18,7 +18,7 @@ Troubleshooting:
 1. Check the Hive and Hadoop configuration xml files with the ones including in the Project Files folder in this project.
 2. Check if the correct Apache flume "twitter.conf" is set in the Java application.
 3. Check to see if the run time configuration contains the following:
-  --module-path /home/s11148140/javafx-sdk-11.0.2/lib --add-modules javafx.controls,javafx.fxml
+  --module-path /path/to/javafx-sdk-x.x.x/lib --add-modules javafx.controls,javafx.fxml //needed for standalone JavaFX library
   -Xms1024M
   -Xmx4096M
   
