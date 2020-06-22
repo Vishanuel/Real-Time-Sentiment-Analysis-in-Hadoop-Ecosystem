@@ -1,5 +1,4 @@
-Java Version 
-  - openjdk version "1.8.0_252"
+Java Version 11.0.7
 
 Apps used in this project:
 1. Apache Hadoop v3.2.1
