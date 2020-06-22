@@ -19,7 +19,7 @@ Before running the app make sure that:
 Troubleshooting:
 1) Check the Hive and Hadoop configuration xml files with the ones including in the Project Files folder in this project.
 2) Check if the correct Apache flume "twitter.conf" is set in the Java application.
-3) Check to see if the run time configuration contains the following:
+3) Check to see if the run time configuration contains the following if JavaFX is installed as standalone:
   --module-path /path/to/javafx-sdk-x.x.x/lib --add-modules javafx.controls,javafx.fxml //needed for standalone JavaFX library
   -Xms1024M
   -Xmx4096M
