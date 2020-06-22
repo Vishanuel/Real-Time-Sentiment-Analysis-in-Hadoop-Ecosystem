@@ -127,8 +127,10 @@ public class App extends Application {
             	          //stmt.execute("create table if not exists dictionary(word string,rating int) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t'");
             	          //stmt.execute("LOAD DATA INPATH '/user/AFINN-111.txt' into TABLE dictionary");
             	          
-            	          //create table word_join by joining
+            	          //create table word_join by joining dictionary and tweets_join, this is done so that almost each tweet words would now have a sentiment value
             	          stmt.execute("create table if not exists word_join as select tweets_join.id, tweets_join.word, tweets_join.search, dictionary.rating from tweets_join LEFT OUTER JOIN dictionary ON(tweets_join.word = dictionary.word)");
+            	          
+            	          //create table rating_table to average out the sentiment value of the tweet words
             	          stmt.execute("create table if not exists rating_table as select id as id,search as search,AVG(rating) as rating from word_join GROUP BY word_join.id, search order by rating");      
             	          ResultSet rs = stmt.executeQuery("select COUNT(id), search from rating_table where rating > 0 GROUP BY search");
             	           
@@ -140,7 +142,7 @@ public class App extends Application {
             	              
             	              if(search != null) {
             	            	  search.strip();
-
+            	               //Update the chart
             	               if(search.contains("amazon")) {
             	            	   	System.out.println("series1   "+search);
             	            	  	Platform.runLater(() -> {
@@ -171,7 +173,7 @@ public class App extends Application {
             	               if(search != null) {
              	            	  search = search.strip();
              	              
- 
+             	            	//Update the chart
             	                if(search.contains("amazon")) {
             	                	System.out.println("series2   "+search);
             	                	Platform.runLater(() -> {
@@ -202,7 +204,8 @@ public class App extends Application {
            					    String search = rs3.getString("search");
            					    if(search != null) {
            		 	            	  search = search.trim();
-
+           		 	            	  
+           		 	            //Update the chart
            					     if(search.contains("amazon")) {
            					    	System.out.println("series3   "+search);
            					    	Platform.runLater(() -> {
@@ -217,7 +220,6 @@ public class App extends Application {
            					     }
            					     else if(search.contains("aliexpress")){
            					    	System.out.println("series3   "+search);
-           					    	//Update the chart
            					    	Platform.runLater(() -> {
            					    		series3.getData().add(new XYChart.Data(Aliexpress, count));
            					    	});

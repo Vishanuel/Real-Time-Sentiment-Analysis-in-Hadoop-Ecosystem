@@ -34,12 +34,7 @@ import javafx.stage.Stage;
  */
 public class Main extends Application{
     private static String driverName = "org.apache.hive.jdbc.HiveDriver";
-    
-    
 
-    
-    
-    
     public printOutput getStreamWrapper(InputStream is, String type)
     {
         return new printOutput(is, type);
