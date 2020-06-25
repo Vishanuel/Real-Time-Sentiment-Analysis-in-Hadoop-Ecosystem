@@ -238,9 +238,9 @@ public class Main extends Application{
     }
     public static void Graphs()
     {
-    	javafx.application.Application.launch(pie_graph.class);
-        javafx.application.Application.launch(sentiment_table.class);
-    	javafx.application.Application.launch(Bargraph.class);
+    	//javafx.application.Application.launch(pie_graph.class);
+        //javafx.application.Application.launch(sentiment_table.class);
+    	//javafx.application.Application.launch(Bargraph.class);
     	 String[] arg = new String[] {"y","n"};
     	TestOpenCloud.main(arg);
     }
@@ -268,7 +268,7 @@ public class Main extends Application{
             
             // Get user's input and perform the operations
             Scanner u_input = new Scanner(System.in);
-            while(!u_input.hasNextInt() || (!u_input.hasNext("[12345679]")))
+            while(!u_input.hasNextInt() || (!u_input.hasNext("[123456789]")))
             {
                 System.out.println("Invalid entry");
                 System.out.println("Please enter a valid number from the choices listed above");
