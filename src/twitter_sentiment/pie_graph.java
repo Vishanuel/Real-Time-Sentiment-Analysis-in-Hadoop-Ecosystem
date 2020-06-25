@@ -1,16 +1,14 @@
 package twitter_sentiment;
 
-
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Series;
+import javafx.scene.chart.PieChart;
+import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.sql.Connection;
@@ -18,80 +16,42 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 
-public class App extends Application {
+public class pie_graph extends Application {
 	final static String Amazon = "Amazon";
     final static String eBay = "eBay";
     final static String Aliexpress = "Aliexpress";
     private ScheduledExecutorService scheduledExecutorService;
     Connection con;
     Statement stmt;
-    
+        
     public static void main(String[] args) {
         launch(args);
     }
 
-    @Override
     public void start(Stage stage) throws Exception {
       
         //defining the axes
-         CategoryAxis xAxis = new CategoryAxis();
-         NumberAxis yAxis = new NumberAxis();
-         yAxis.setAnimated(false); // axis animations are removed
-         xAxis.setAnimated(false); // axis animations are removed
-         
-         //create bar chart
-         final BarChart<String,Number> bc = new BarChart<String,Number>(xAxis,yAxis);
-         
-         //defining a series to display data
-         XYChart.Series<String, Number> series1 = new XYChart.Series<>();
-         XYChart.Series<String, Number> series2 = new XYChart.Series<>();
-         XYChart.Series<String, Number> series3 = new XYChart.Series<>();
-
-         stage.setTitle("Bar Chart Sample");
-         
-         bc.setTitle("Sentiment Analysis");
-         // disable animations
-         bc.setAnimated(false);
-         xAxis.setLabel("Company");       
-         yAxis.setLabel("Sentiment Count");
-         
-         series1.setName("Postive");              
-         series2.setName("Neutral");        
-         series3.setName("Negative"); 
-
-         // add series to chart
-         // put dummy data onto graph 
-         series1.getData().add(new XYChart.Data(Amazon, 0));
-   		series1.getData().add(new XYChart.Data(eBay, 0));
-   		 series1.getData().add(new XYChart.Data(Aliexpress, 0));
-  		 series2.getData().add(new XYChart.Data(Amazon, 0));
-   		series2.getData().add(new XYChart.Data(eBay, 0));
-   		 series2.getData().add(new XYChart.Data(Aliexpress, 0));
-  		series3.getData().add(new XYChart.Data(Amazon, 0));
-  		series3.getData().add(new XYChart.Data(eBay, 0));
-  		 series3.getData().add(new XYChart.Data(Aliexpress, 0));
-        bc.getData().addAll(series1,series2,series3);
-
+    	final PieChart chart = new PieChart();
+        chart.setTitle("Tweets Count per Company");
+    
+        chart.setLabelsVisible(true);
+       // chart.getData().add(new PieChart.Data("Iphone 5S", 13));
+        final Label caption = new Label("");     
         
-        Task task = new Task<Void>() {
+         Task<Void> task = new Task<Void>() {
         	
 			@Override
 			protected Void call() throws Exception {
 				Thread.sleep(8000);
-				while (true) {
+				//while (true) {
 	              
 	                try {
 	                	  //create connection and connect to hiveserver2
-            			  con = DriverManager.getConnection("jdbc:hive2://localhost:10000/", "", "");
-            			  stmt = con.createStatement();
-            			 
+	                	con = DriverManager.getConnection("jdbc:hive2://localhost:10000/", "", "");
+	            		stmt = con.createStatement();
+            			 /*
             			  //create table load_tweets and load in twitter data
              			  stmt.execute("create external table if not exists load_tweets(id BIGINT, text STRING) ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.JsonSerDe' LOCATION '/user/Hadoop/twitter_data'");
             	          
@@ -134,7 +94,8 @@ public class App extends Application {
             	          
             	          //create table rating_table to average out the sentiment value of the tweet words
             	          stmt.execute("create table if not exists rating_table as select id as id,search as search,AVG(rating) as rating from word_join GROUP BY word_join.id, search order by rating");      
-            	          ResultSet rs = stmt.executeQuery("select COUNT(id), search from rating_table where rating > 0 GROUP BY search");
+            	            */      	         
+            	          ResultSet rs = stmt.executeQuery("select COUNT(id), search from rating_table WHERE search IS NOT NULL GROUP BY search");
             	           
             	       
             	            while (rs.next()) {
@@ -148,111 +109,73 @@ public class App extends Application {
             	               if(search.contains("amazon")) {
             	            	   	System.out.println("series1   "+search);
             	            	  	Platform.runLater(() -> {
-            	            	  		series1.getData().add(new XYChart.Data(Amazon, count));
+            	            	  		chart.getData().add(new PieChart.Data(search, count));
             	            	  	});
             	                }
             	                else if(search.contains("eBay")  || search.contains("ebay")) {
             	                	System.out.println("series1   "+search);
             	                  	Platform.runLater(() -> {
-            	                  		series1.getData().add(new XYChart.Data(eBay, count));
+            	                  		chart.getData().add(new PieChart.Data(search, count));
             	                  	});
             	                }
             	                else if(search.contains("aliexpress")){
             	                	System.out.println("series1   "+search);
             	                	Platform.runLater(() -> {
-            	                		series1.getData().add(new XYChart.Data(Aliexpress, count));
+            	                		chart.getData().add(new PieChart.Data(search, count));
             	                	});
             	                }
             	              }
             	               System.out.println(count+"    "+search);
             	            }
-
-            	            ResultSet rs2 = stmt.executeQuery("select COUNT(id), search from rating_table where rating = 0 GROUP BY search");
-            	            while (rs2.next()) {
-            	               int count = rs2.getInt("_c0");
-
-            	               String search = rs2.getString("search");
-            	               if(search != null) {
-             	            	  search = search.strip();
-             	              
-             	            	//Update the chart
-            	                if(search.contains("amazon")) {
-            	                	System.out.println("series2   "+search);
-            	                	Platform.runLater(() -> {
-            	                		series2.getData().add(new XYChart.Data(Amazon, count));
-            	                	});
-            	                }
-            	                else if(search.contains("eBay") || search.contains("ebay")) {
-            	                	System.out.println("series2   "+search);
-            	                	Platform.runLater(() -> {
-            	                		series2.getData().add(new XYChart.Data(eBay, count));
-            	                	});
-            	                }
-            	                else if(search.contains("aliexpress")){
-            	                	System.out.println("series2   "+search);
-            	                	Platform.runLater(() -> {
-            	                		series2.getData().add(new XYChart.Data(Aliexpress, count));
-            	                	 });
-            	                }
-            	               }
-            	                System.out.println(count+"    "+search);
-            	             }
-           				
-            	           ResultSet rs3 = stmt.executeQuery("select COUNT(id), search from rating_table where rating < 0 GROUP BY search");
-	
-           					while (rs3.next()) {
-           					    int count = rs3.getInt("_c0");
-     
-           					    String search = rs3.getString("search");
-           					    if(search != null) {
-           		 	            	  search = search.trim();
-           		 	            	  
-           		 	            //Update the chart
-           					     if(search.contains("amazon")) {
-           					    	System.out.println("series3   "+search);
-           					    	Platform.runLater(() -> {
-           					    		series3.getData().add(new XYChart.Data(Amazon, count));
-           					    	});
-           					     }
-           					     else if(search.contains("eBay")|| search.contains("ebay")) {
-           					    	System.out.println("series3   "+search);
-           					    	Platform.runLater(() -> {
-           					    		series3.getData().add(new XYChart.Data(eBay, count));
-           					    	});
-           					     }
-           					     else if(search.contains("aliexpress")){
-           					    	System.out.println("series3   "+search);
-           					    	Platform.runLater(() -> {
-           					    		series3.getData().add(new XYChart.Data(Aliexpress, count));
-           					    	});
-           					     }
-           					    }
-           					   
-           					    
-           					 }
+            	           /// String text = "";
+            	            
+            	            Platform.runLater(() -> { 	
+            	            	
+            	            	
+            	            	for (final PieChart.Data data : chart.getData()) {
+            	            		double total = 0;
+            	            		for (PieChart.Data d : chart.getData()) {
+        	                            total += d.getPieValue();
+        	                        }
+            	            		String text = String.format("%.1f%%", 100*data.getPieValue()/total) ;
+	            	                data.nameProperty().bind(
+	            	                        Bindings.concat(
+	            	                                data.getName(), " ", text , ""
+	            	                        )
+	            	                );
+            	            	}
+            	            });
+            	            
            					System.out.println("Complete");
-           			
-           					con.close();
+           					
            				} catch (SQLException e) {
            					// TODO Auto-generated catch block
            					e.printStackTrace();
            				}
 	                // UI update is run on the Application thread
 	               // Platform.runLater(updater);
-	            }
+	        //    }
+					return null;
 			}
 			
         	
         };
-        //create new thread
+        
         Thread tread = new Thread(task);
         // don't let thread prevent JVM shutdown
         tread.setDaemon(true);
         //thread start
         tread.start();
         
+       // FlowPane root = new FlowPane();
+       // root.getChildren().addAll(bc,bc2);
+        
+        //create new thread
+        
+        
+       /// root.getChildren().addAll(chart);
         // setup scene
-        Scene scene = new Scene(bc, 800, 600);
+        Scene scene = new Scene(chart, 900, 900);
         stage.setScene(scene);
         // show the stage
         stage.show();
@@ -260,7 +183,9 @@ public class App extends Application {
 
     @Override
     public void stop() throws Exception {
+    	con.close();
         super.stop();
         scheduledExecutorService.shutdownNow();
     }
+
 }

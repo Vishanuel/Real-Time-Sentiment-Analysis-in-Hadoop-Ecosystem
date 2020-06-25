@@ -6,7 +6,11 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-11-oracle"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-11-oracle">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/CopyLibs/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/apache-log4j-extras-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/apacheds-i18n-2.0.0-M15.jar"/>
@@ -209,7 +213,8 @@
 	<classpathentry kind="lib" path="lib/CopyLibs/xz-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/zkclient-0.3.jar"/>
 	<classpathentry kind="lib" path="lib/CopyLibs/zookeeper-3.4.6.jar"/>
-	<classpathentry kind="lib" path="lib/CopyLibs/flume-sources-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/CopyLibs/flume-sources-1.0-SNAPSHOT.jar" sourcepath="lib/CopyLibs/flume-sources-1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/jfreechart-1.5.0.jar"/>
+	<classpathentry kind="lib" path="lib/opencloud-0.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
