@@ -238,10 +238,10 @@ public class Main extends Application{
     }
     public static void Graphs()
     {
-    	//javafx.application.Application.launch(pie_graph.class);
-        //javafx.application.Application.launch(sentiment_table.class);
-    	//javafx.application.Application.launch(Bargraph.class);
-    	 String[] arg = new String[] {"y","n"};
+    	javafx.application.Application.launch(pie_graph.class);
+        javafx.application.Application.launch(sentiment_table.class);
+    	javafx.application.Application.launch(Bargraph.class);
+    	String[] arg = new String[] {"y","n"};
     	TestOpenCloud.main(arg);
     }
 
