@@ -184,7 +184,7 @@ public class Main extends Application{
         //stmt.execute("LOAD DATA INPATH '/user/AFINN-111.txt' into TABLE dictionary");
         
         //create table word_join by joining dictionary and tweets_join, this is done so that almost each tweet words would now have a sentiment value
-        stmt.execute("create table if not exists word_join as select tweets_join.id, tweets_join.word, tweets_join.search, dictionary.rating from tweets_join LEFT OUTER JOIN dictionary ON(tweets_join.word = dictionary.word)");
+        stmt.execute("create table if not exists word_join stored as orc TBLPROPERTIES('transactional'='true') as select tweets_join.id, tweets_join.word, tweets_join.search, dictionary.rating from tweets_join LEFT OUTER JOIN dictionary ON(tweets_join.word = dictionary.word)");
         
         //create table rating_table to average out the sentiment value of the tweet words
         stmt.execute("create table if not exists rating_table as select id as id,search as search,AVG(rating) as rating from word_join GROUP BY word_join.id, search order by rating");      
@@ -239,8 +239,32 @@ public class Main extends Application{
     public static void Graphs()
     {
     	javafx.application.Application.launch(pie_graph.class);
+       // javafx.application.Application.launch(sentiment_table.class);
+    	//javafx.application.Application.launch(Bargraph.class);
+    	//String[] arg = new String[] {"y","n"};
+    	//TestOpenCloud.main(arg);
+    }
+    public static void Graphs2()
+    {
+    	//javafx.application.Application.launch(pie_graph.class);
         javafx.application.Application.launch(sentiment_table.class);
+    	///javafx.application.Application.launch(Bargraph.class);
+    	//String[] arg = new String[] {"y","n"};
+    	//TestOpenCloud.main(arg);
+    }
+    public static void Graphs3()
+    {
+    	//javafx.application.Application.launch(pie_graph.class);
+       // javafx.application.Application.launch(sentiment_table.class);
     	javafx.application.Application.launch(Bargraph.class);
+    	//String[] arg = new String[] {"y","n"};
+    	//TestOpenCloud.main(arg);
+    }
+    public static void Graphs4()
+    {
+    	//javafx.application.Application.launch(pie_graph.class);
+       // javafx.application.Application.launch(sentiment_table.class);
+    	//javafx.application.Application.launch(Bargraph.class);
     	String[] arg = new String[] {"y","n"};
     	TestOpenCloud.main(arg);
     }
@@ -262,13 +286,17 @@ public class Main extends Application{
             System.out.println("Enter '5' to drop tables(development and debugging)");
             System.out.println("Enter '6' to process data(development and debugging, use after process 7)");
             System.out.println("Enter '7' to begin fetching tweets into HDFS");
-            System.out.println("Enter '8' to get graphical analysis(use after running option 6, not real-time)");
-            System.out.println("Enter '9' to exit");
+            System.out.println("Enter '8' to get graphical analysis - percentage tweet (use after running option 6, not real-time)");
+            System.out.println("Enter '9' to get graphical analysis - 3 best and worst sentiment (use after running option 6, not real-time)");
+            System.out.println("Enter '10' to get graphical analysis - sentiment count and average sentiment  (use after running option 6, not real-time)");
+            System.out.println("Enter '11' to get graphical analysis - world bubble (use after running option 6, not real-time)");
+            System.out.println("Enter '12' to exit");
             //System.out.print(">>");
             
             // Get user's input and perform the operations
             Scanner u_input = new Scanner(System.in);
-            while(!u_input.hasNextInt() || (!u_input.hasNext("[123456789]")))
+            
+            while(!u_input.hasNextInt())
             {
                 System.out.println("Invalid entry");
                 System.out.println("Please enter a valid number from the choices listed above");
@@ -316,6 +344,15 @@ public class Main extends Application{
                 	Graphs();
                 break;
                 case 9:
+                	Graphs2();
+                break;	
+                case 10:
+                	Graphs3();
+                break;	
+                case 11:
+                	Graphs4();
+                break;	
+                case 12:
                 	System.exit(0);
                 break;	
             }
