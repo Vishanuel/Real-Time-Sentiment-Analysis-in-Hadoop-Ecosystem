@@ -14,7 +14,8 @@ Before running the app make sure that:
 5) A table named "dictionary" is created in hive with AFINN-111.txt loaded into the "dictionary" table.
 6) Apache Flume is storing twitter data into hdfs in the "/user/Hadoop/twitter-data" folder.
 7) Apache Flume "twitter.conf" path in the Java application may need to be modified.
-8) JavaFX library is installed(it is recommended to use a Java version that already has the JavaFX module).
+8) Store the latest version of twitter4j.jar in the Apache Flume directory.
+9) JavaFX library is installed(it is recommended to use a Java version that already has the JavaFX module).
 
 Troubleshooting:
 1) Check the Hive and Hadoop configuration xml files with the ones including in the Project Files folder in this project.
